@@ -1,0 +1,21 @@
+{{- if .Values.mainsecret.nonSensitive.hpaenable }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Values.mainsecret.nonSensitive.appname }}-hpa
+  namespace: {{ .Values.mainsecret.nonSensitive.namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Values.mainsecret.nonSensitive.appname }}
+  minReplicas: {{ .Values.mainsecret.nonSensitive.hpaminreplica }}
+  maxReplicas: {{ .Values.mainsecret.nonSensitive.hpamaxreplica }}
+  metrics:
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.mainsecret.nonSensitive.hpamemoryusage }}
+{{- end }}

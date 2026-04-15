@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.mainsecret.nonSensitive.appname }}
+  namespace: {{ .Values.mainsecret.nonSensitive.namespace }}
+  labels:
+  {{- include "op.datadog" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.mainsecret.nonSensitive.deploymentreplicas }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      app: {{ .Values.mainsecret.nonSensitive.appname }}
+  template:
+    metadata:
+      labels:
+      {{- include "op.ddlabel" . | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: 60
+      # securityContext:
+      #   runAsUser: 1000
+      terminationGracePeriodSeconds: 60
+      {{- if .Values.mainsecret.nonSensitive.serviceaccountenable }}
+      serviceAccountName: {{ .Values.mainsecret.nonSensitive.serviceAccountName }}
+      {{- end }} 
+      containers:
+      - name: {{ .Values.mainsecret.nonSensitive.containername }}
+        image: {{ .Values.mainsecret.nonSensitive.containerimage }}
+        securityContext:
+          allowPrivilegeEscalation: {{ .Values.container.securityContext.allowPrivilegeEscalation }}
+        ports:
+        - name: {{ .Values.container.port }}
+          containerPort: {{ .Values.container.containerPort }}
+        # the readiness probe details
+        startupProbe:
+        {{- toYaml .Values.startupProbe | nindent 10 }}
+        readinessProbe:
+        {{- toYaml .Values.readiness | nindent 10 }}
+        # the livenessProbe probe details
+        livenessProbe:
+        {{- toYaml .Values.liveness | nindent 10 }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        resources:
+          limits:
+            cpu: {{ .Values.mainsecret.nonSensitive.limitcpu }}
+            memory: {{ .Values.mainsecret.nonSensitive.limitmemory }}
+          requests:
+            cpu: {{ .Values.mainsecret.nonSensitive.requestcpu }}
+            memory: {{ .Values.mainsecret.nonSensitive.requestmemory }}
+        env:
+        {{- toYaml .Values.environmentVariable | nindent 10 }}

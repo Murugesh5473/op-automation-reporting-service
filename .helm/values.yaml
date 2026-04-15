@@ -1,0 +1,84 @@
+app:
+  version:
+  organization: <ORG_NAME>
+
+revisionHistoryLimit: 10
+
+container:
+  securityContext:
+    allowPrivilegeEscalation: true
+  port: http
+  containerPort: 3000
+
+startupProbe:
+  httpGet:
+    path: /automation-service/health
+    port: 3000
+    scheme: HTTP # or HTTPS
+  failureThreshold: 30
+  periodSeconds: 5
+  timeoutSeconds: 5
+
+readiness:
+  httpGet: # make an HTTP request
+    port: 3000 # port to use
+    path: /automation-service/health # endpoint to hit
+    scheme: HTTP # or HTTPS
+  initialDelaySeconds: 30 # how long to wait before checking
+  periodSeconds: 10 # how long to wait between checks
+  successThreshold: 1 # how many successes to hit before accepting
+  failureThreshold: 2 # how many failures to accept before failing
+  timeoutSeconds: 2 # how long to wait for a responses
+# the livenessProbe probe details
+liveness:
+  httpGet: # make an HTTP request
+    port: 3000 # port to use
+    path: /automation-service/health # endpoint to hit
+    scheme: HTTP # or HTTPS
+  periodSeconds: 3 # how long to wait between checks
+  successThreshold: 1 # how many successes to hit before accepting
+  failureThreshold: 2 # how many failures to accept before failing
+  timeoutSeconds: 2 # how long to wait for a response
+
+
+imagePullPolicy: Always
+
+
+environmentVariable:
+
+  #################Datadog agent values #############
+  - name: DD_AGENT_HOST
+    valueFrom:
+      fieldRef:
+        fieldPath: status.hostIP
+  - name: DD_ENV
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.labels['tags.datadoghq.com/env']
+  - name: DD_SERVICE
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.labels['tags.datadoghq.com/service']
+  - name: DD_VERSION
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.labels['tags.datadoghq.com/version']
+  - name: DD_LOGS_INJECTION
+    value: "true"
+  - name: DD_TRACE_SAMPLE_RATE
+    value: "1"
+  - name: DD_PROFILING_ENABLED
+    value: "false"
+
+
+########### service values ###########
+
+svc:
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+
+mainsecret:
+  sensitive:
+  nonSensitive:

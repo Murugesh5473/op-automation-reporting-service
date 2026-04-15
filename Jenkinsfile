@@ -1,0 +1,3 @@
+@Library('jenkins-shared-library-v2') _
+def config = [serviceGithubUrl: "https://git.<COMPANY_DOMAIN>/org-name/op-automation-reporting-service.git", serviceEcr: "op-automation-reporting-ecr", serviceName: "op-automation-reporting", serviceDeploymentFile: "op-automation-reporting.yaml", sonarProjectKey: "org-name_op-automation-reporting-service", configTable: "op_automation_reporting", targetClusters: ["devops"]]
+mmtcNodeServices(config)
